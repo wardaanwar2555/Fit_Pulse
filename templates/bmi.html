@@ -1,0 +1,749 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BMI Calculator - FitPulse Health</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* Animated Background Particles */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(0, 255, 150, 0.6);
+            border-radius: 50%;
+            animation: float 6s infinite ease-in-out;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.3; }
+            50% { transform: translateY(-20px) rotate(180deg); opacity: 1; }
+        }
+
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+            animation: fadeInDown 1s ease-out;
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .logo {
+            font-size: 2.5rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #00ff96, #00d4ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 15px;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { filter: drop-shadow(0 0 20px rgba(0, 255, 150, 0.5)); }
+            to { filter: drop-shadow(0 0 30px rgba(0, 212, 255, 0.7)); }
+        }
+
+        .page-title {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            background: linear-gradient(45deg, #fff, #00ff96, #00d4ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .page-subtitle {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        /* Main Grid */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            animation: fadeInUp 1s ease-out 0.3s both;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Calculator Card */
+        .calculator-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 25px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(0, 255, 150, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .calculator-card:hover {
+            border-color: rgba(0, 255, 150, 0.6);
+            box-shadow: 0 30px 60px rgba(0, 255, 150, 0.2);
+        }
+
+        .card-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            display: block;
+            text-align: center;
+            filter: drop-shadow(0 0 20px rgba(0, 255, 150, 0.5));
+        }
+
+        .card-title {
+            font-size: 2rem;
+            margin-bottom: 30px;
+            text-align: center;
+            background: linear-gradient(45deg, #00ff96, #00d4ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+            color: #00ff96;
+            font-weight: 600;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 15px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(0, 255, 150, 0.3);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #00ff96;
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 0 20px rgba(0, 255, 150, 0.3);
+        }
+
+        .form-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Radio Buttons */
+        .radio-group {
+            display: flex;
+            gap: 20px;
+            margin-top: 10px;
+        }
+
+        .radio-label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.1rem;
+        }
+
+        .radio-input {
+            margin-right: 10px;
+            width: 20px;
+            height: 20px;
+            accent-color: #00ff96;
+        }
+
+        /* Unit Toggle */
+        .unit-toggle {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            background: rgba(0, 255, 150, 0.1);
+            padding: 8px;
+            border-radius: 15px;
+        }
+
+        .unit-btn {
+            flex: 1;
+            padding: 12px 20px;
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .unit-btn.active {
+            background: linear-gradient(45deg, #00ff96, #00d4ff);
+            color: #0f0f23;
+            box-shadow: 0 5px 15px rgba(0, 255, 150, 0.3);
+        }
+
+        /* Calculate Button */
+        .calculate-btn {
+            width: 100%;
+            padding: 18px 40px;
+            background: linear-gradient(45deg, #00ff96, #00d4ff);
+            color: #0f0f23;
+            border: none;
+            border-radius: 15px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            margin-top: 30px;
+        }
+
+        .calculate-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .calculate-btn:hover::before {
+            left: 100%;
+        }
+
+        .calculate-btn:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 10px 30px rgba(0, 255, 150, 0.4);
+        }
+
+        /* Result Card */
+        .result-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 25px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(0, 255, 150, 0.2);
+            text-align: center;
+        }
+
+        .result-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            display: block;
+            filter: drop-shadow(0 0 20px rgba(0, 255, 150, 0.5));
+            animation: iconFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes iconFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .result-title {
+            font-size: 1.5rem;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 20px;
+        }
+
+        .bmi-value {
+            font-size: 5rem;
+            font-weight: bold;
+            margin: 20px 0;
+            background: linear-gradient(45deg, #00ff96, #00d4ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        .bmi-category {
+            display: inline-block;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin: 20px 0;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .category-underweight {
+            background: linear-gradient(45deg, #2196F3, #64B5F6);
+            color: #fff;
+        }
+
+        .category-normal {
+            background: linear-gradient(45deg, #4CAF50, #81C784);
+            color: #fff;
+        }
+
+        .category-overweight {
+            background: linear-gradient(45deg, #FF9800, #FFB74D);
+            color: #fff;
+        }
+
+        .category-obese {
+            background: linear-gradient(45deg, #F44336, #E57373);
+            color: #fff;
+        }
+
+        /* BMI Chart */
+        .bmi-chart {
+            margin: 40px 0;
+            position: relative;
+        }
+
+        .chart-bar {
+            height: 60px;
+            border-radius: 15px;
+            display: flex;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            margin-bottom: 30px;
+        }
+
+        .chart-segment {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: bold;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .chart-segment:hover {
+            filter: brightness(1.2);
+            transform: scaleY(1.1);
+        }
+
+        .segment-underweight {
+            background: linear-gradient(45deg, #2196F3, #64B5F6);
+            flex: 18.5;
+        }
+
+        .segment-normal {
+            background: linear-gradient(45deg, #4CAF50, #81C784);
+            flex: 6.4;
+        }
+
+        .segment-overweight {
+            background: linear-gradient(45deg, #FF9800, #FFB74D);
+            flex: 5;
+        }
+
+        .segment-obese {
+            background: linear-gradient(45deg, #F44336, #E57373);
+            flex: 10.1;
+        }
+
+        .bmi-pointer {
+            position: absolute;
+            width: 4px;
+            height: 80px;
+            background: #fff;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+            top: -10px;
+            transform: translateX(-50%);
+            transition: left 0.5s ease;
+        }
+
+        .bmi-pointer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-top: 15px solid #fff;
+        }
+
+        .bmi-pointer-value {
+            position: absolute;
+            top: -35px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #fff;
+            color: #0f0f23;
+            padding: 5px 15px;
+            border-radius: 10px;
+            font-weight: bold;
+            white-space: nowrap;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Chart Labels */
+        .chart-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* Health Info */
+        .health-info {
+            background: rgba(0, 255, 150, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 30px;
+            border-left: 5px solid #00ff96;
+            text-align: left;
+        }
+
+        .health-info h4 {
+            color: #00ff96;
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+        }
+
+        .health-info p {
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.8;
+            margin-bottom: 10px;
+        }
+
+        .health-info ul {
+            margin-top: 15px;
+            padding-left: 20px;
+        }
+
+        .health-info li {
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.8;
+            margin-bottom: 8px;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .empty-icon {
+            font-size: 5rem;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .empty-text {
+            font-size: 1.3rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        /* Responsive */
+        @media (max-width: 968px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .page-title {
+                font-size: 2.5rem;
+            }
+
+            .bmi-value {
+                font-size: 4rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .container {
+                padding: 20px 10px;
+            }
+
+            .calculator-card,
+            .result-card {
+                padding: 25px;
+            }
+
+            .page-title {
+                font-size: 2rem;
+            }
+
+            .bmi-value {
+                font-size: 3rem;
+            }
+
+            .chart-segment {
+                font-size: 0.7rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated Background Particles -->
+    <div class="particles" id="particles"></div>
+
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">⚖️ FitPulse Health</div>
+            <h1 class="page-title">BMI Calculator</h1>
+            <p class="page-subtitle">Calculate your Body Mass Index and get personalized health insights</p>
+        </div>
+
+        <!-- Main Grid -->
+        <div class="main-grid">
+            <!-- Calculator Card -->
+            <div class="calculator-card">
+                <span class="card-icon">📊</span>
+                <h2 class="card-title">Enter Your Details</h2>
+
+                <form method="POST" action="/bmi">
+                    <!-- Unit Toggle -->
+                    <div class="unit-toggle">
+                        <button type="button" class="unit-btn active" onclick="switchUnit('metric')">Metric Units</button>
+                        <button type="button" class="unit-btn" onclick="switchUnit('imperial')">Imperial Units</button>
+                    </div>
+
+                    <!-- Age -->
+                    <div class="form-group">
+                        <label class="form-label">Age</label>
+                        <input type="number" name="age" class="form-input" placeholder="Enter your age" 
+                               min="2" max="120" value="{{ age or '' }}" required>
+                    </div>
+
+                    <!-- Gender -->
+                    <div class="form-group">
+                        <label class="form-label">Gender</label>
+                        <div class="radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="gender" value="male" class="radio-input" 
+                                       {% if gender == 'male' or not gender %}checked{% endif %} required>
+                                Male
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="gender" value="female" class="radio-input"
+                                       {% if gender == 'female' %}checked{% endif %}>
+                                Female
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Height (Metric) -->
+                    <div class="form-group metric-input">
+                        <label class="form-label">Height (cm)</label>
+                        <input type="number" name="height_cm" class="form-input" placeholder="Enter height in cm" 
+                               min="50" max="250" step="0.1" value="{{ height_cm or '' }}">
+                    </div>
+
+                    <!-- Height (Imperial) -->
+                    <div class="form-group imperial-input" style="display: none;">
+                        <label class="form-label">Height</label>
+                        <div style="display: flex; gap: 10px;">
+                            <input type="number" name="height_ft" class="form-input" placeholder="Feet" 
+                                   min="3" max="8" value="{{ height_ft or '' }}" style="flex: 1;">
+                            <input type="number" name="height_in" class="form-input" placeholder="Inches" 
+                                   min="0" max="11" value="{{ height_in or '' }}" style="flex: 1;">
+                        </div>
+                    </div>
+
+                    <!-- Weight (Metric) -->
+                    <div class="form-group metric-input">
+                        <label class="form-label">Weight (kg)</label>
+                        <input type="number" name="weight_kg" class="form-input" placeholder="Enter weight in kg" 
+                               min="20" max="300" step="0.1" value="{{ weight_kg or '' }}">
+                    </div>
+
+                    <!-- Weight (Imperial) -->
+                    <div class="form-group imperial-input" style="display: none;">
+                        <label class="form-label">Weight (lbs)</label>
+                        <input type="number" name="weight_lbs" class="form-input" placeholder="Enter weight in pounds" 
+                               min="44" max="660" step="0.1" value="{{ weight_lbs or '' }}">
+                    </div>
+
+                    <input type="hidden" name="unit_system" id="unitSystem" value="metric">
+
+                    <!-- Calculate Button -->
+                    <button type="submit" class="calculate-btn">
+                        <span>🧮</span> Calculate BMI
+                    </button>
+                </form>
+            </div>
+
+            <!-- Result Card -->
+            <div class="result-card">
+                {% if bmi %}
+                    <span class="result-icon">✨</span>
+                    <h3 class="result-title">Your BMI Result</h3>
+                    
+                    <div class="bmi-value">{{ "%.1f"|format(bmi) }}</div>
+                    
+                    <div class="bmi-category category-{{ category_class }}">
+                        {{ category }}
+                    </div>
+
+                    <!-- BMI Chart -->
+                    <div class="bmi-chart">
+                        <div class="chart-bar">
+                            <div class="chart-segment segment-underweight" title="Underweight: < 18.5">
+                                &lt; 18.5<br>Underweight
+                            </div>
+                            <div class="chart-segment segment-normal" title="Normal: 18.5 - 24.9">
+                                18.5 - 24.9<br>Normal
+                            </div>
+                            <div class="chart-segment segment-overweight" title="Overweight: 25 - 29.9">
+                                25 - 29.9<br>Overweight
+                            </div>
+                            <div class="chart-segment segment-obese" title="Obese: ≥ 30">
+                                ≥ 30<br>Obese
+                            </div>
+                        </div>
+                        <div style="position: relative; height: 80px;">
+                            <div class="bmi-pointer" style="left: {{ pointer_position }}%;">
+                                <div class="bmi-pointer-value">{{ "%.1f"|format(bmi) }}</div>
+                            </div>
+                        </div>
+                        <div class="chart-labels">
+                            <span>0</span>
+                            <span>18.5</span>
+                            <span>25</span>
+                            <span>30</span>
+                            <span>40</span>
+                        </div>
+                    </div>
+
+                    <!-- Health Info -->
+                    <div class="health-info">
+                        <h4>📋 Health Insights</h4>
+                        <p>{{ health_description }}</p>
+                        
+                        {% if recommendations %}
+                        <h4 style="margin-top: 20px;">💡 Recommendations</h4>
+                        <ul>
+                            {% for rec in recommendations %}
+                            <li>{{ rec }}</li>
+                            {% endfor %}
+                        </ul>
+                        {% endif %}
+                    </div>
+
+                {% else %}
+                    <!-- Empty State -->
+                    <div class="empty-state">
+                        <div class="empty-icon">📊</div>
+                        <p class="empty-text">Enter your details to calculate your BMI</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Create floating particles
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const particleCount = 50;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 6 + 's';
+                particle.style.animationDuration = (Math.random() * 3 + 3) + 's';
+                
+                const colors = [
+                    'rgba(0, 255, 150, 0.6)',
+                    'rgba(0, 212, 255, 0.6)',
+                    'rgba(255, 152, 0, 0.6)'
+                ];
+                particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // Switch between metric and imperial units
+        function switchUnit(unit) {
+            const metricInputs = document.querySelectorAll('.metric-input');
+            const imperialInputs = document.querySelectorAll('.imperial-input');
+            const unitBtns = document.querySelectorAll('.unit-btn');
+            
+            unitBtns.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            document.getElementById('unitSystem').value = unit;
+            
+            if (unit === 'metric') {
+                metricInputs.forEach(input => {
+                    input.style.display = 'block';
+                    input.querySelector('input').required = true;
+                });
+                imperialInputs.forEach(input => {
+                    input.style.display = 'none';
+                    input.querySelectorAll('input').forEach(inp => inp.required = false);
+                });
+            } else {
+                metricInputs.forEach(input => {
+                    input.style.display = 'none';
+                    input.querySelector('input').required = false;
+                });
+                imperialInputs.forEach(input => {
+                    input.style.display = 'block';
+                    input.querySelectorAll('input').forEach(inp => inp.required = true);
+                });
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            createParticles();
+        });
+    </script>
+</body>
+</html>

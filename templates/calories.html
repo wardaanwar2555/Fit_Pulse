@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calorie Calculator - FitPulse Health</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+        
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(0, 255, 150, 0.6);
+            border-radius: 50%;
+            animation: float 6s infinite ease-in-out;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.3; }
+            50% { transform: translateY(-20px) rotate(180deg); opacity: 1; }
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+        
+        .logo {
+            font-size: 2.5rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #00ff96, #00d4ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 15px;
+        }
+        
+        .page-title {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            background: linear-gradient(45deg, #fff, #00ff96, #00d4ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .page-subtitle {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .main-grid {
+            display: grid;
+            grid-template-columns: 400px 1fr;
+            gap: 30px;
+        }
+        
+        .calculator-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 25px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(0, 255, 150, 0.2);
+            height: fit-content;
+        }
+        
+        .card-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            display: block;
+            text-align: center;
+        }
+        
+        .card-title {
+            font-size: 1.8rem;
+            margin-bottom: 25px;
+            text-align: center;
+            background: linear-gradient(45deg, #00ff96, #00d4ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 1rem;
+            color: #00ff96;
+            font-weight: 600;
+        }
+        
+        .form-input, .form-select {
+            width: 100%;
+            padding: 12px 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(0, 255, 150, 0.3);
+            border-radius: 10px;
+            color: #fff;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: #00ff96;
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
+        .form-select option {
+            background: #1a1a2e;
+            color: #fff;
+        }
+        
+        .radio-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 8px;
+        }
+        
+        .radio-label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            color: rgba(255, 255, 255, 0.9);
+        }
+        
+        .radio-input {
+            margin-right: 8px;
+            width: 18px;
+            height: 18px;
+            accent-color: #00ff96;
+        }
+        
+        .calculate-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(45deg, #00ff96, #00d4ff);
+            color: #0f0f23;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+        
+        .calculate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 255, 150, 0.4);
+        }
+        
+        .results-section {
+            {% if not result %}display: none;{% endif %}
+        }
+        
+        .result-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 25px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(0, 255, 150, 0.2);
+            margin-bottom: 30px;
+        }
+        
+        .result-title {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #00ff96, #00d4ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .calorie-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .calorie-item {
+            background: rgba(0, 255, 150, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            border: 2px solid rgba(0, 255, 150, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .calorie-item:hover {
+            transform: translateY(-5px);
+            border-color: rgba(0, 255, 150, 0.6);
+        }
+        
+        .calorie-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #00ff96;
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        .calorie-label {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.8);
+            display: block;
+        }
+        
+        .calorie-sublabel {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.6);
+            display: block;
+            margin-top: 5px;
+        }
+        
+        .zigzag-title {
+            font-size: 1.5rem;
+            color: #00d4ff;
+            margin: 30px 0 15px 0;
+        }
+        
+        .zigzag-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+        
+        .zigzag-table th {
+            background: linear-gradient(45deg, #00ff96, #00d4ff);
+            color: #0f0f23;
+            padding: 15px;
+            font-weight: bold;
+            text-align: left;
+        }
+        
+        .zigzag-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .zigzag-table tr:hover {
+            background: rgba(0, 255, 150, 0.1);
+        }
+        
+        .diet-btn {
+            padding: 12px 25px;
+            background: linear-gradient(45deg, #9C27B0, #E91E63);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .diet-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(156, 39, 176, 0.4);
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(0, 255, 150, 0.3);
+            border-top: 4px solid #00ff96;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @media (max-width: 1200px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="particles" id="particles"></div>
+    
+    <div class="container">
+        <div class="header">
+            <div class="logo">🔥 FitPulse Health</div>
+            <h1 class="page-title">Calorie Calculator</h1>
+            <p class="page-subtitle">Calculate your daily calorie needs and get AI-powered meal plans</p>
+        </div>
+        
+        <div class="main-grid">
+            <div class="calculator-card">
+                <span class="card-icon">📊</span>
+                <h2 class="card-title">Your Details</h2>
+                
+                <form method="POST">
+                    <div class="form-group">
+                        <label class="form-label">Age</label>
+                        <input type="number" name="age" class="form-input" placeholder="Enter age" min="15" max="80" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Gender</label>
+                        <div class="radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="gender" value="male" class="radio-input" checked>
+                                Male
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="gender" value="female" class="radio-input">
+                                Female
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Height (cm)</label>
+                        <input type="number" name="height" class="form-input" placeholder="Enter height" min="120" max="220" step="0.1" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Weight (kg)</label>
+                        <input type="number" name="weight" class="form-input" placeholder="Enter weight" min="30" max="200" step="0.1" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Activity Level</label>
+                        <select name="activity_level" class="form-select" required>
+                            <option value="1.2">Sedentary (little/no exercise)</option>
+                            <option value="1.375">Lightly active (1-3 days/week)</option>
+                            <option value="1.55" selected>Moderately active (3-5 days/week)</option>
+                            <option value="1.725">Very active (6-7 days/week)</option>
+                            <option value="1.9">Super active (athlete)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Goal</label>
+                        <select name="goal" id="goalSelect" class="form-select" required>
+                            <option value="lose">Weight Loss</option>
+                            <option value="maintain" selected>Maintain Weight</option>
+                            <option value="gain">Weight Gain</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Diet Preference</label>
+                        <select name="diet" id="dietSelect" class="form-select">
+                            <option value="">No Preference</option>
+                            <option value="vegetarian">Vegetarian</option>
+                            <option value="vegan">Vegan</option>
+                            <option value="ketogenic">Keto</option>
+                            <option value="paleo">Paleo</option>
+                            <option value="gluten free">Gluten Free</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="calculate-btn">🧮 Calculate Calories</button>
+                </form>
+            </div>
+            
+            <div class="results-section">
+                {% if result and not result.error %}
+                <div class="result-card">
+                    <h3 class="result-title"><span>🎯</span> Your Daily Calorie Needs</h3>
+                    
+                    <div class="calorie-grid">
+                        {% if result.calorie_goals.maintain %}
+                        <div class="calorie-item">
+                            <span class="calorie-value">{{ result.calorie_goals.maintain|int }}</span>
+                            <span class="calorie-label">Maintain Weight</span>
+                            <span class="calorie-sublabel">100%</span>
+                        </div>
+                        {% endif %}
+                        
+                        {% if result.calorie_goals.mild_loss %}
+                        <div class="calorie-item">
+                            <span class="calorie-value">{{ result.calorie_goals.mild_loss|int }}</span>
+                            <span class="calorie-label">Mild Weight Loss</span>
+                            <span class="calorie-sublabel">0.5 lb/week • 90%</span>
+                        </div>
+                        {% endif %}
+                        
+                        {% if result.calorie_goals.weight_loss %}
+                        <div class="calorie-item">
+                            <span class="calorie-value">{{ result.calorie_goals.weight_loss|int }}</span>
+                            <span class="calorie-label">Weight Loss</span>
+                            <span class="calorie-sublabel">1 lb/week • 80%</span>
+                        </div>
+                        {% endif %}
+                        
+                        {% if result.calorie_goals.extreme_loss %}
+                        <div class="calorie-item">
+                            <span class="calorie-value">{{ result.calorie_goals.extreme_loss|int }}</span>
+                            <span class="calorie-label">Extreme Weight Loss</span>
+                            <span class="calorie-sublabel">2 lb/week • 65%</span>
+                        </div>
+                        {% endif %}
+                        
+                        {% if result.calorie_goals.mild_gain %}
+                        <div class="calorie-item">
+                            <span class="calorie-value">{{ result.calorie_goals.mild_gain|int }}</span>
+                            <span class="calorie-label">Mild Weight Gain</span>
+                            <span class="calorie-sublabel">0.5 lb/week • 110%</span>
+                        </div>
+                        {% endif %}
+                        
+                        {% if result.calorie_goals.weight_gain %}
+                        <div class="calorie-item">
+                            <span class="calorie-value">{{ result.calorie_goals.weight_gain|int }}</span>
+                            <span class="calorie-label">Weight Gain</span>
+                            <span class="calorie-sublabel">1 lb/week • 120%</span>
+                        </div>
+                        {% endif %}
+                        
+                        {% if result.calorie_goals.extreme_gain %}
+                        <div class="calorie-item">
+                            <span class="calorie-value">{{ result.calorie_goals.extreme_gain|int }}</span>
+                            <span class="calorie-label">Extreme Weight Gain</span>
+                            <span class="calorie-sublabel">2 lb/week • 135%</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {% if result.calorie_breakdown %}
+                <h3 class="zigzag-title">Calorie Breakdown by Goal</h3>
+                <table class="zigzag-table">
+                    <thead>
+                        <tr>
+                            <th>Goal</th>
+                            <th>Calories</th>
+                            <th>Protein (g)</th>
+                            <th>Carbs (g)</th>
+                            <th>Fats (g)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for goal, data in result.calorie_breakdown.items() %}
+                        <tr>
+                            <td>{{ goal.replace('_', ' ').title() }}</td>
+                            <td>{{ data.calories|int }}</td>
+                            <td>{{ data.protein|int }}</td>
+                            <td>{{ data.carbs|int }}</td>
+                            <td>{{ data.fats|int }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% endif %}
+                
+                {% set target_calorie = result.calorie_goals.get(result.selected_goal, result.calorie_goals.maintain) %}
+             <button class="diet-btn" onclick="window.location.href='/meal_plans'">🍽️ Get  Meal Plan chart</button>
+
+                
+                {% elif result and result.error %}
+                <div class="result-card">
+                    <h3 class="result-title"><span>⚠️</span> Error</h3>
+                    <p>{{ result.error }}</p>
+                </div>
+                {% else %}
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <p>Enter your details and click "Calculate Calories" to see your results.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <script>
+        // Particle Background
+        const particlesContainer = document.getElementById('particles');
+        const numParticles = 100;
+
+        for (let i = 0; i < numParticles; i++) {
+            const particle = document.createElement('div');
+            particle.classList.add('particle');
+            particle.style.top = Math.random() * 100 + 'vh';
+            particle.style.left = Math.random() * 100 + 'vw';
+            particle.style.animationDelay = Math.random() * 6 + 's';
+            particle.style.width = particle.style.height = (Math.random() * 3 + 2) + 'px';
+            particlesContainer.appendChild(particle);
+        }
+    </script>
+</body>
+</html>

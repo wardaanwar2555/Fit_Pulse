@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select Workout - FitPulse Health</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+        
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(0, 255, 150, 0.6);
+            border-radius: 50%;
+            animation: float 6s infinite ease-in-out;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.3; }
+            50% { transform: translateY(-20px) rotate(180deg); opacity: 1; }
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .logo {
+            font-size: 2.5rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #00ff96, #00d4ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 15px;
+        }
+        
+        .page-title {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            background: linear-gradient(45deg, #fff, #00ff96, #00d4ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .page-subtitle {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .controls-bar {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 25px;
+            padding: 25px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(0, 255, 150, 0.2);
+            margin-bottom: 30px;
+            display: flex;
+            gap: 30px;
+            align-items: center;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+        
+        .stopwatch-section {
+            flex: 1;
+            min-width: 250px;
+        }
+        
+        .stopwatch-display {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #00ff96;
+            text-align: center;
+            margin-bottom: 15px;
+            font-family: 'Courier New', monospace;
+            text-shadow: 0 0 20px rgba(0, 255, 150, 0.5);
+        }
+        
+        .stopwatch-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        
+        .stopwatch-btn {
+            padding: 12px 24px;
+            background: linear-gradient(45deg, #00ff96, #00d4ff);
+            color: #0f0f23;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .stopwatch-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 255, 150, 0.4);
+        }
+        
+        .stopwatch-btn.reset {
+            background: linear-gradient(45deg, #ff6b6b, #ff8787);
+        }
+        
+        .music-section {
+            flex: 1;
+            min-width: 250px;
+        }
+        
+        .music-label {
+            font-size: 1.2rem;
+            color: #00d4ff;
+            margin-bottom: 15px;
+            display: block;
+            text-align: center;
+        }
+        
+        .music-select {
+            width: 100%;
+            padding: 12px 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(0, 255, 150, 0.3);
+            border-radius: 10px;
+            color: #fff;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            margin-bottom: 10px;
+        }
+        
+        .music-select:focus {
+            outline: none;
+            border-color: #00ff96;
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
+        .music-select option {
+            background: #1a1a2e;
+            color: #fff;
+        }
+        
+        .music-controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        
+        .music-btn {
+            padding: 10px 20px;
+            background: linear-gradient(45deg, #9C27B0, #E91E63);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .music-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(156, 39, 176, 0.4);
+        }
+        
+        .volume-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+            justify-content: center;
+        }
+        
+        .volume-slider {
+            width: 150px;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            outline: none;
+            accent-color: #00ff96;
+        }
+        
+        .workout-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .workout-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 25px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(0, 255, 150, 0.2);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .workout-card:hover {
+            transform: translateY(-10px);
+            border-color: rgba(0, 255, 150, 0.6);
+            box-shadow: 0 30px 50px rgba(0, 255, 150, 0.3);
+        }
+        
+        .workout-card.selected {
+            border-color: #00ff96;
+            background: rgba(0, 255, 150, 0.15);
+        }
+        
+        .workout-icon {
+            font-size: 3rem;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        
+        .workout-title {
+            font-size: 1.8rem;
+            text-align: center;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #00ff96, #00d4ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .workout-description {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 15px;
+        }
+        
+        .workout-details {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .workout-detail {
+            text-align: center;
+        }
+        
+        .detail-value {
+            display: block;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #00ff96;
+        }
+        
+        .detail-label {
+            display: block;
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.6);
+            margin-top: 5px;
+        }
+        
+        .start-button {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(45deg, #00ff96, #00d4ff);
+            color: #0f0f23;
+            border: none;
+            border-radius: 15px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 30px;
+        }
+        
+        .start-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(0, 255, 150, 0.5);
+        }
+        
+        .start-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        @media (max-width: 768px) {
+            .controls-bar {
+                flex-direction: column;
+            }
+            
+            .stopwatch-display {
+                font-size: 2.5rem;
+            }
+            
+            .page-title {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="particles" id="particles"></div>
+    
+    <div class="container">
+        <div class="header">
+            <div class="logo">🔥 FitPulse Health</div>
+            <h1 class="page-title">Select Your Workout</h1>
+            <p class="page-subtitle">Choose a workout routine and start your fitness journey</p>
+        </div>
+        
+        <div class="controls-bar">
+            <div class="stopwatch-section">
+                <div class="stopwatch-display" id="stopwatch">00:00:00</div>
+                <div class="stopwatch-buttons">
+                    <button class="stopwatch-btn" id="startStop" onclick="toggleStopwatch()">▶️ Start</button>
+                    <button class="stopwatch-btn reset" onclick="resetStopwatch()">🔄 Reset</button>
+                </div>
+            </div>
+            
+            <div class="music-section">
+                <label class="music-label">🎵 Workout Music</label>
+                <select class="music-select" id="musicSelect" onchange="changeMusic()">
+                    <option value="">No Music</option>
+                    <option value="energetic">Energetic Beats</option>
+                    <option value="motivation">Motivation Mix</option>
+                    <option value="intense">Intense Training</option>
+                    <option value="calm">Calm Focus</option>
+                </select>
+                <div class="music-controls">
+                    <button class="music-btn" id="playPause" onclick="toggleMusic()">▶️ Play</button>
+                    <button class="music-btn" onclick="stopMusic()">⏹️ Stop</button>
+                </div>
+                <div class="volume-control">
+                    <span>🔊</span>
+                    <input type="range" class="volume-slider" id="volumeSlider" min="0" max="100" value="50" onchange="changeVolume()">
+                    <span id="volumeDisplay">50%</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="workout-grid">
+            <div class="workout-card" onclick="selectWorkout(this, 'strength')">
+                <div class="workout-icon">💪</div>
+                <h3 class="workout-title">Strength Training</h3>
+                <p class="workout-description">Build muscle and increase strength with resistance exercises</p>
+                <div class="workout-details">
+                    <div class="workout-detail">
+                        <span class="detail-value">45</span>
+                        <span class="detail-label">Minutes</span>
+                    </div>
+                    <div class="workout-detail">
+                        <span class="detail-value">High</span>
+                        <span class="detail-label">Intensity</span>
+                    </div>
+                    <div class="workout-detail">
+                        <span class="detail-value">350</span>
+                        <span class="detail-label">Calories</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="workout-card" onclick="selectWorkout(this, 'cardio')">
+                <div class="workout-icon">🏃</div>
+                <h3 class="workout-title">Cardio Blast</h3>
+                <p class="workout-description">Boost your heart rate and burn calories fast</p>
+                <div class="workout-details">
+                    <div class="workout-detail">
+                        <span class="detail-value">30</span>
+                        <span class="detail-label">Minutes</span>
+                    </div>
+                    <div class="workout-detail">
+                        <span class="detail-value">Very High</span>
+                        <span class="detail-label">Intensity</span>
+                    </div>
+                    <div class="workout-detail">
+                        <span class="detail-value">400</span>
+                        <span class="detail-label">Calories</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="workout-card" onclick="selectWorkout(this, 'yoga')">
+                <div class="workout-icon">🧘</div>
+                <h3 class="workout-title">Yoga Flow</h3>
+                <p class="workout-description">Improve flexibility, balance, and mindfulness</p>
+                <div class="workout-details">
+                    <div class="workout-detail">
+                        <span class="detail-value">60</span>
+                        <span class="detail-label">Minutes</span>
+                    </div>
+                    <div class="workout-detail">
+                        <span class="detail-value">Low</span>
+                        <span class="detail-label">Intensity</span>
+                    </div>
+                    <div class="workout-detail">
+                        <span class="detail-value">180</span>
+                        <span class="detail-label">Calories</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="workout-card" onclick="selectWorkout(this, 'hiit')">
+                <div class="workout-icon">⚡</div>
+                <h3 class="workout-title">HIIT Training</h3>
+                <p class="workout-description">High-intensity intervals for maximum results</p>
+                <div class="workout-details">
+                    <div class="workout-detail">
+                        <span class="detail-value">25</span>
+                        <span class="detail-label">Minutes</span>
+                    </div>
+                    <div class="workout-detail">
+                        <span class="detail-value">Extreme</span>
+                        <span class="detail-label">Intensity</span>
+                    </div>
+                    <div class="workout-detail">
+                        <span class="detail-value">450</span>
+                        <span class="detail-label">Calories</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="workout-card" onclick="selectWorkout(this, 'pilates')">
+                <div class="workout-icon">🤸</div>
+                <h3 class="workout-title">Pilates Core</h3>
+                <p class="workout-description">Strengthen your core and improve posture</p>
+                <div class="workout-details">
+                    <div class="workout-detail">
+                        <span class="detail-value">40</span>
+                        <span class="detail-label">Minutes</span>
+                    </div>
+                    <div class="workout-detail">
+                        <span class="detail-value">Medium</span>
+                        <span class="detail-label">Intensity</span>
+                    </div>
+                    <div class="workout-detail">
+                        <span class="detail-value">220</span>
+                        <span class="detail-label">Calories</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="workout-card" onclick="selectWorkout(this, 'boxing')">
+                <div class="workout-icon">🥊</div>
+                <h3 class="workout-title">Boxing Workout</h3>
+                <p class="workout-description">Punch your way to fitness and stress relief</p>
+                <div class="workout-details">
+                    <div class="workout-detail">
+                        <span class="detail-value">35</span>
+                        <span class="detail-label">Minutes</span>
+                    </div>
+                    <div class="workout-detail">
+                        <span class="detail-value">High</span>
+                        <span class="detail-label">Intensity</span>
+                    </div>
+                    <div class="workout-detail">
+                        <span class="detail-value">420</span>
+                        <span class="detail-label">Calories</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <button class="start-button" id="startButton" onclick="startWorkout()" disabled>
+            🚀 Start Selected Workout
+        </button>
+    </div>
+    
+    <!-- Hidden Audio Elements -->
+    <audio id="audioEnergetic" loop>
+        <source src="Push-Long-Version(chosic.com).ogg" type="audio/ogg">
+        <source src="Push-Long-Version(chosic.com).mp3" type="audio/mpeg">
+    </audio>
+    
+    <audio id="audioMotivation" loop>
+        <source src="motivation.ogg" type="audio/ogg">
+        <source src="motivation.mp3" type="audio/mpeg">
+    </audio>
+    
+    <audio id="audioIntense" loop>
+        <source src="intense.ogg" type="audio/ogg">
+        <source src="intense.mp3" type="audio/mpeg">
+    </audio>
+    
+    <audio id="audioCalm" loop>
+        <source src="calm.ogg" type="audio/ogg">
+        <source src="calm.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        // Particle Background
+        const particlesContainer = document.getElementById('particles');
+        const numParticles = 100;
+
+        for (let i = 0; i < numParticles; i++) {
+            const particle = document.createElement('div');
+            particle.classList.add('particle');
+            particle.style.top = Math.random() * 100 + 'vh';
+            particle.style.left = Math.random() * 100 + 'vw';
+            particle.style.animationDelay = Math.random() * 6 + 's';
+            particle.style.width = particle.style.height = (Math.random() * 3 + 2) + 'px';
+            particlesContainer.appendChild(particle);
+        }
+        
+        // Stopwatch functionality
+        let stopwatchInterval = null;
+        let stopwatchTime = 0;
+        let isRunning = false;
+        
+        function toggleStopwatch() {
+            const btn = document.getElementById('startStop');
+            if (isRunning) {
+                clearInterval(stopwatchInterval);
+                btn.textContent = '▶️ Start';
+                isRunning = false;
+            } else {
+                stopwatchInterval = setInterval(updateStopwatch, 10);
+                btn.textContent = '⏸️ Pause';
+                isRunning = true;
+            }
+        }
+        
+        function updateStopwatch() {
+            stopwatchTime += 10;
+            const hours = Math.floor(stopwatchTime / 3600000);
+            const minutes = Math.floor((stopwatchTime % 3600000) / 60000);
+            const seconds = Math.floor((stopwatchTime % 60000) / 1000);
+            const milliseconds = Math.floor((stopwatchTime % 1000) / 10);
+            
+            document.getElementById('stopwatch').textContent = 
+                `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+        
+        function resetStopwatch() {
+            clearInterval(stopwatchInterval);
+            stopwatchTime = 0;
+            isRunning = false;
+            document.getElementById('stopwatch').textContent = '00:00:00';
+            document.getElementById('startStop').textContent = '▶️ Start';
+        }
+        
+        // Audio player references
+        const audioPlayers = {
+            energetic: document.getElementById('audioEnergetic'),
+            motivation: document.getElementById('audioMotivation'),
+            intense: document.getElementById('audioIntense'),
+            calm: document.getElementById('audioCalm')
+        };
+        
+        let currentAudioPlayer = null;
+        let currentMusic = '';
+        
+        // Set initial volume for all audio players
+        Object.values(audioPlayers).forEach(player => {
+            player.volume = 0.5;
+            
+            // Add error event listeners to debug loading issues
+            player.addEventListener('error', function(e) {
+                console.error('Audio loading error for:', this.id, e);
+                alert('Error loading audio file for ' + this.id + '. Please check if the file exists.');
+            });
+            
+            player.addEventListener('canplay', function() {
+                console.log('Audio ready:', this.id);
+            });
+        });
+        
+        function changeMusic() {
+            const select = document.getElementById('musicSelect');
+            const newMusic = select.value;
+            
+            // If music is currently playing, stop it and switch to new track
+            if (currentAudioPlayer && !currentAudioPlayer.paused) {
+                currentAudioPlayer.pause();
+                currentAudioPlayer.currentTime = 0;
+                
+                // If a new track is selected, start playing it
+                if (newMusic && audioPlayers[newMusic]) {
+                    currentAudioPlayer = audioPlayers[newMusic];
+                    currentMusic = newMusic;
+                    currentAudioPlayer.play().catch(error => {
+                        console.log('Audio play failed:', error);
+                    });
+                } else {
+                    currentAudioPlayer = null;
+                    currentMusic = '';
+                    document.getElementById('playPause').textContent = '▶️ Play';
+                }
+            } else {
+                currentMusic = newMusic;
+                if (newMusic && audioPlayers[newMusic]) {
+                    currentAudioPlayer = audioPlayers[newMusic];
+                }
+            }
+        }
+        
+        function toggleMusic() {
+            const btn = document.getElementById('playPause');
+            const select = document.getElementById('musicSelect');
+            
+            if (!select.value) {
+                alert('Please select a music track first!');
+                return;
+            }
+            
+            if (!currentAudioPlayer) {
+                currentAudioPlayer = audioPlayers[select.value];
+                currentMusic = select.value;
+            }
+            
+            if (currentAudioPlayer.paused) {
+                currentAudioPlayer.play().then(() => {
+                    btn.textContent = '⏸️ Pause';
+                }).catch(error => {
+                    console.log('Audio play failed:', error);
+                    alert('Could not play audio. Please check if the audio file exists.');
+                });
+            } else {
+                currentAudioPlayer.pause();
+                btn.textContent = '▶️ Play';
+            }
+        }
+        
+        function stopMusic() {
+            if (currentAudioPlayer) {
+                currentAudioPlayer.pause();
+                currentAudioPlayer.currentTime = 0;
+            }
+            document.getElementById('playPause').textContent = '▶️ Play';
+        }
+        
+        function changeVolume() {
+            const slider = document.getElementById('volumeSlider');
+            const display = document.getElementById('volumeDisplay');
+            const volume = slider.value / 100;
+            
+            // Update volume for all players
+            Object.values(audioPlayers).forEach(player => {
+                player.volume = volume;
+            });
+            
+            display.textContent = slider.value + '%';
+        }
+        
+        // Workout selection
+        let selectedWorkout = null;
+        
+        function selectWorkout(card, workoutType) {
+            document.querySelectorAll('.workout-card').forEach(c => {
+                c.classList.remove('selected');
+            });
+            card.classList.add('selected');
+            selectedWorkout = workoutType;
+            document.getElementById('startButton').disabled = false;
+        }
+        
+        function startWorkout() {
+            if (!selectedWorkout) {
+                alert('Please select a workout first!');
+                return;
+            }
+            alert(`Starting ${selectedWorkout} workout!\n\nStopwatch: ${isRunning ? 'Running' : 'Stopped'}\nMusic: ${currentAudioPlayer && !currentAudioPlayer.paused ? 'Playing' : 'Stopped'}`);
+            
+            // Auto-start stopwatch if not running
+            if (!isRunning) {
+                toggleStopwatch();
+            }
+        }
+    </script>
+</body>
+</html>

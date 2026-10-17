@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Exercise Coach - FitPulse Health</title>
+  <style>
+     * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+      color: #fff;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container { max-width: 1400px; margin: auto; padding: 40px 20px; }
+    .header { text-align: center; margin-bottom: 40px; }
+
+    .logo {
+      font-size: 2.5rem; font-weight: bold;
+      background: linear-gradient(45deg, #00ff96, #00d4ff);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+
+    .page-title {
+      font-size: 3rem;
+      background: linear-gradient(45deg, #fff, #00ff96, #00d4ff);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      margin: 10px 0;
+    }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1fr 350px;
+      gap: 30px;
+      align-items: start;
+    }
+
+    .video-section, .sidebar {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(20px);
+      border-radius: 25px;
+      padding: 30px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+      border: 2px solid rgba(0, 255, 150, 0.2);
+    }
+
+    .video-container {
+      position: relative;
+      width: 100%;
+      padding-bottom: 56.25%;
+      background: #000;
+      border-radius: 15px;
+      overflow: hidden;
+    }
+
+    video {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      border-radius: 15px;
+    }
+
+    .video-title { font-size: 1.8rem; color: #00ff96; margin: 20px 0 10px; }
+    .video-description { color: rgba(255,255,255,0.8); margin-bottom: 20px; }
+
+    .video-stats { display: flex; gap: 20px; flex-wrap: wrap; }
+    .stat-item {
+      background: rgba(0,255,150,0.1);
+      padding: 10px 20px;
+      border-radius: 10px;
+      border: 1px solid rgba(0,255,150,0.3);
+    }
+    .stat-value { color: #00ff96; font-weight: bold; }
+
+    .sidebar-title {
+      font-size: 1.5rem;
+      background: linear-gradient(45deg, #00ff96, #00d4ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 15px;
+    }
+
+    .workout-list { display: flex; flex-direction: column; gap: 10px; }
+    .workout-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px; border-radius: 12px;
+      border: 2px solid rgba(0,255,150,0.2);
+      background: rgba(255,255,255,0.05);
+      cursor: pointer; transition: 0.3s;
+    }
+
+    .workout-item:hover, .workout-item.active {
+      background: rgba(0,255,150,0.2);
+      border-color: #00ff96;
+      transform: translateX(5px);
+    }
+
+    .workout-icon { font-size: 1.5rem; }
+    .workout-name { font-size: 1rem; color: #fff; }
+    .workout-duration { font-size: 0.85rem; color: rgba(255,255,255,0.6); }
+
+    /* === Controls section === */
+    .controls {
+      margin-top: 25px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      justify-content: center;
+      text-align: center;
+    }
+
+    button {
+      background: linear-gradient(45deg, #00ff96, #00d4ff);
+      color: #000;
+      font-weight: bold;
+      border: none;
+      border-radius: 10px;
+      padding: 10px 20px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover { transform: scale(1.05); }
+
+    select {
+      padding: 8px;
+      border-radius: 10px;
+      border: none;
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+    }
+
+    .timer-display {
+      margin-top: 10px;
+      font-size: 1.5rem;
+      color: #00ff96;
+      text-align: center;
+    }
+
+    @media (max-width: 1024px) {
+      .main-grid { grid-template-columns: 1fr; }
+    }
+    .start-btn {
+  margin-top: 30px;
+  padding: 15px 40px;
+  font-size: 18px;
+  border: none;
+  border-radius: 50px;
+  background: #35a038;
+  color: #333;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(255, 222, 89, 0.4);
+}
+
+.start-btn:hover {
+  background: #ffe680;
+  transform: scale(1.05);
+  box-shadow: 0 8px 25px rgba(255, 222, 89, 0.6);
+}
+    
+    </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="logo">🔥 FitPulse Health</div>
+      <h1 class="page-title">Exercise Coach</h1>
+      <p>Professional workout guidance and training videos</p>
+    </div>
+
+    <div class="main-grid">
+      <!-- VIDEO SECTION -->
+      <div class="video-section">
+        <div class="video-container">
+          <video id="exerciseVideo" controls>
+            <source src="{{ url_for('static', filename='videos/14512233_3840_2160_50fps.mp4') }}" type="video/mp4">
+            <source src="{{ url_for('static', filename='videos/14512233_3840_2160_50fps.ogg') }}" type="video/ogg">
+            Your browser does not support the video tag.
+          </video>
+        </div>
+
+        <h2 id="videoTitle" class="video-title">Full Body HIIT Workout</h2>
+        <p id="videoDescription" class="video-description">
+          High-intensity interval training designed to burn calories and build strength.
+        </p>
+
+        <div class="video-stats">
+          <div class="stat-item"><span class="stat-label">Duration</span> <span id="videoDuration" class="stat-value">30 min</span></div>
+          <div class="stat-item"><span class="stat-label">Difficulty</span> <span id="videoDifficulty" class="stat-value">Intermediate</span></div>
+          <div class="stat-item"><span class="stat-label">Calories</span> <span id="videoCalories" class="stat-value">300-400</span></div>
+        </div>
+      </div>
+      <button class="start-btn" onclick="window.location.href='/select'">
+      🚀 Let's Start
+    </button>
+      <!-- SIDEBAR -->
+      <div class="sidebar">
+        <h3 class="sidebar-title">🏋️ Workout Library</h3>
+
+        <div class="workout-list">
+          <div class="workout-item active" onclick="selectWorkout(0)">
+            <span class="workout-icon">💪</span>
+            <div>
+              <div class="workout-name">Full Body HIIT</div>
+              <div class="workout-duration">30 min • Intermediate</div>
+            </div>
+          </div>
+
+          <div class="workout-item" onclick="selectWorkout(1)">
+            <span class="workout-icon">🦵</span>
+            <div>
+              <div class="workout-name">Lower Body Strength</div>
+              <div class="workout-duration">25 min • Beginner</div>
+            </div>
+          </div>
+
+          <div class="workout-item" onclick="selectWorkout(2)">
+            <span class="workout-icon">💪</span>
+            <div>
+              <div class="workout-name">Upper Body Power</div>
+              <div class="workout-duration">35 min • Advanced</div>
+            </div>
+          </div>
+
+          <div class="workout-item" onclick="selectWorkout(3)">
+            <span class="workout-icon">🧘</span>
+            <div>
+              <div class="workout-name">Core & Flexibility</div>
+              <div class="workout-duration">20 min • All Levels</div>
+            </div>
+          </div>
+
+          <div class="workout-item" onclick="selectWorkout(4)">
+            <span class="workout-icon">🏃</span>
+            <div>
+              <div class="workout-name">Cardio Blast</div>
+              <div class="workout-duration">40 min • Intermediate</div>
+            </div>
+          </div>
+
+          <div class="workout-item" onclick="selectWorkout(5)">
+            <span class="workout-icon">🧘‍♀️</span>
+            <div>
+              <div class="workout-name">Yoga & Stretching</div>
+              <div class="workout-duration">30 min • All Levels</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const workouts = [
+      {
+        title: 'Full Body HIIT Workout',
+        description: 'High-intensity interval training to burn calories and build strength.',
+        duration: '30 min', difficulty: 'Intermediate', calories: '300-400',
+        video: "{{ url_for('static', filename='videos/200657-913478674_small.mp4') }}",
+        videoOgg: "{{ url_for('static', filename='videos/200657-913478674_small.ogg') }}"
+      },
+      {
+        title: 'Lower Body Strength',
+        description: 'Focus on legs and glutes. Perfect for beginners.',
+        duration: '25 min', difficulty: 'Beginner', calories: '200-300',
+        video: "{{ url_for('static', filename='videos/PixVerse_V5_Image_Text_720P_create__serate_6_v.mp4') }}",
+        videoOgg: "{{ url_for('static', filename='videos/PixVerse_V5_Image_Text_720P_create__serate_6_v.ogg') }}"
+      },
+      {
+        title: 'Upper Body Power',
+        description: 'Targets chest, back, shoulders, and arms.',
+        duration: '35 min', difficulty: 'Advanced', calories: '350-450',
+        video: "{{ url_for('static', filename='videos/241405_small.mp4') }}",
+        videoOgg: "{{ url_for('static', filename='videos/241405_small.ogg') }}"
+      },
+      {
+        title: 'Core & Flexibility',
+        description: 'Strengthen your core and improve flexibility.',
+        duration: '20 min', difficulty: 'All Levels', calories: '150-250',
+        video: "{{ url_for('static', filename='videos/18369-291382852_small.mp4') }}",
+        videoOgg: "{{ url_for('static', filename='videos/18369-291382852_small.ogg') }}"
+      },
+      {
+        title: 'Cardio Blast',
+        description: 'High-energy cardio session to boost endurance.',
+        duration: '40 min', difficulty: 'Intermediate', calories: '400-500',
+        video: "{{ url_for('static', filename='videos/294-135882925_small.mp4') }}",
+        videoOgg: "{{ url_for('static', filename='videos/294-135882925_small.ogg') }}"
+      },
+      {
+        title: 'Yoga & Stretching',
+        description: 'Gentle yoga and stretching for relaxation.',
+        duration: '30 min', difficulty: 'All Levels', calories: '100-200',
+        video: "{{ url_for('static', filename='videos/129423-744370596_small.mp4') }}",
+        videoOgg: "{{ url_for('static', filename='videos/129423-744370596_small.ogg') }}"
+      }
+    ];
+ function formatTime(sec) {
+      const m = Math.floor(sec / 60).toString().padStart(2, "0");
+      const s = (sec % 60).toString().padStart(2, "0");
+      return `${m}:${s}`;
+    }
+
+    function startTimer() {
+      clearInterval(timerInterval);
+      timerInterval = setInterval(() => {
+        seconds++;
+        timerDisplay.textContent = formatTime(seconds);
+      }, 1000);
+    }
+
+    function stopTimer() { clearInterval(timerInterval); }
+    function resetTimer() { clearInterval(timerInterval); seconds = 0; timerDisplay.textContent = "00:00"; }
+
+    function startWorkout() {
+      const video = document.getElementById("exerciseVideo");
+      video.play();
+      const selectedMusic = document.getElementById("musicSelect").value;
+      if (selectedMusic && headphonesOn) {
+        musicPlayer.src = selectedMusic;
+        musicPlayer.loop = true;
+        musicPlayer.play();
+      }
+      startTimer();
+    }
+
+    function toggleHeadphones() {
+      headphonesOn = !headphonesOn;
+      const btn = document.getElementById("headphoneToggle");
+      btn.textContent = headphonesOn ? "🎧 Headphones: On" : "🎧 Headphones: Off";
+      if (!headphonesOn) musicPlayer.pause();
+    }
+    const video = document.getElementById('exerciseVideo');
+
+    function selectWorkout(index) {
+      const items = document.querySelectorAll('.workout-item');
+      items.forEach(item => item.classList.remove('active'));
+      items[index].classList.add('active');
+
+      const workout = workouts[index];
+      document.getElementById('videoTitle').textContent = workout.title;
+      document.getElementById('videoDescription').textContent = workout.description;
+      document.getElementById('videoDuration').textContent = workout.duration;
+      document.getElementById('videoDifficulty').textContent = workout.difficulty;
+      document.getElementById('videoCalories').textContent = workout.calories;
+
+      video.innerHTML = `
+        <source src="${workout.video}" type="video/mp4">
+        <source src="${workout.videoOgg}" type="video/ogg">
+        Your browser does not support the video tag.
+      `;
+      video.load();
+      video.play();
+    }
+  </script>
+</body>
+</html>

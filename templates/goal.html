@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Goal Adjuster - FitPulse Health</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+        
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(0, 255, 150, 0.6);
+            border-radius: 50%;
+            animation: float 6s infinite ease-in-out;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.3; }
+            50% { transform: translateY(-20px) rotate(180deg); opacity: 1; }
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .logo {
+            font-size: 2.5rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #00ff96, #00d4ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 15px;
+        }
+        
+        .page-title {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            background: linear-gradient(45deg, #fff, #00ff96, #00d4ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .page-subtitle {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .main-grid {
+            display: grid;
+            grid-template-columns: 350px 1fr 400px;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 25px;
+            padding: 25px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(0, 255, 150, 0.2);
+        }
+        
+        .card-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #00ff96, #00d4ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .stat-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-box {
+            background: rgba(0, 255, 150, 0.1);
+            border: 2px solid rgba(0, 255, 150, 0.3);
+            border-radius: 15px;
+            padding: 15px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .stat-box:hover {
+            transform: translateY(-3px);
+            border-color: rgba(0, 255, 150, 0.6);
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #00ff96;
+            display: block;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.8);
+            margin-top: 5px;
+        }
+        
+        .progress-bar {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            height: 20px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        .progress-fill {
+            background: linear-gradient(45deg, #00ff96, #00d4ff);
+            height: 100%;
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: #0f0f23;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+            color: #00ff96;
+            font-weight: 600;
+        }
+        
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 12px 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(0, 255, 150, 0.3);
+            border-radius: 10px;
+            color: #fff;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .form-textarea {
+            resize: vertical;
+            min-height: 100px;
+            font-family: Arial, sans-serif;
+        }
+        
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: #00ff96;
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(45deg, #00ff96, #00d4ff);
+            color: #0f0f23;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 255, 150, 0.4);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(45deg, #9C27B0, #E91E63);
+        }
+        
+        .btn-secondary:hover {
+            box-shadow: 0 10px 30px rgba(156, 39, 176, 0.4);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(45deg, #ff4757, #ff6348);
+        }
+        
+        .btn-danger:hover {
+            box-shadow: 0 10px 30px rgba(255, 71, 87, 0.4);
+        }
+        
+        .goal-item {
+            background: rgba(0, 212, 255, 0.1);
+            border: 2px solid rgba(0, 212, 255, 0.3);
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+        
+        .goal-item:hover {
+            transform: translateX(5px);
+            border-color: rgba(0, 212, 255, 0.6);
+        }
+        
+        .goal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .goal-name {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #00d4ff;
+        }
+        
+        .goal-status {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        
+        .status-active {
+            background: rgba(0, 255, 150, 0.2);
+            color: #00ff96;
+        }
+        
+        .status-paused {
+            background: rgba(255, 193, 7, 0.2);
+            color: #ffc107;
+        }
+        
+        .status-completed {
+            background: rgba(76, 175, 80, 0.2);
+            color: #4caf50;
+        }
+        
+        .goal-details {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 5px;
+        }
+        
+        .goal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .btn-small {
+            padding: 8px 15px;
+            font-size: 0.9rem;
+            flex: 1;
+        }
+        
+        .journal-entry {
+            background: rgba(156, 39, 176, 0.1);
+            border: 2px solid rgba(156, 39, 176, 0.3);
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .journal-date {
+            font-size: 0.85rem;
+            color: #9C27B0;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        
+        .journal-text {
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.6;
+        }
+        
+        .alert {
+            background: rgba(255, 193, 7, 0.2);
+            border: 2px solid rgba(255, 193, 7, 0.5);
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 20px;
+            color: #ffc107;
+        }
+        
+        .alert-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+        }
+        
+        .injury-badge {
+            display: inline-block;
+            background: rgba(255, 71, 87, 0.2);
+            color: #ff4757;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin-right: 8px;
+            margin-bottom: 8px;
+        }
+        
+        .adjustment-log {
+            background: rgba(0, 255, 150, 0.05);
+            border-left: 4px solid #00ff96;
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+        }
+        
+        .adjustment-date {
+            font-size: 0.85rem;
+            color: #00ff96;
+            font-weight: bold;
+        }
+        
+        .adjustment-text {
+            color: rgba(255, 255, 255, 0.9);
+            margin-top: 5px;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .tab {
+            padding: 12px 20px;
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .tab.active {
+            color: #00ff96;
+            border-bottom-color: #00ff96;
+        }
+        
+        .tab:hover {
+            color: #00d4ff;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: rgba(26, 26, 46, 0.95);
+            border: 2px solid rgba(0, 255, 150, 0.3);
+            border-radius: 25px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .modal-title {
+            font-size: 1.8rem;
+            background: linear-gradient(45deg, #00ff96, #00d4ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .close-btn:hover {
+            color: #ff4757;
+            transform: rotate(90deg);
+        }
+        
+        @media (max-width: 1400px) {
+            .main-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .card:last-child {
+                grid-column: 1 / -1;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+            .stat-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="particles" id="particles"></div>
+    
+    <div class="container">
+        <div class="header">
+            <div class="logo">🔥 FitPulse Health</div>
+            <h1 class="page-title">Smart Goal Adjuster</h1>
+            <p class="page-subtitle">AI-powered dynamic goal tracking with injury management and progress journaling</p>
+        </div>
+        
+        <div class="main-grid">
+            <!-- Dashboard Card -->
+            <div class="card">
+                <h2 class="card-title"><span>📊</span> Dashboard</h2>
+                
+                <div class="stat-grid">
+                    <div class="stat-box">
+                        <span class="stat-value" id="activeGoals">0</span>
+                        <span class="stat-label">Active Goals</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-value" id="currentStreak">0</span>
+                        <span class="stat-label">Day Streak</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-value" id="completedGoals">0</span>
+                        <span class="stat-label">Completed</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-value" id="totalAdjustments">0</span>
+                        <span class="stat-label">Adjustments</span>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Overall Progress</label>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="overallProgress" style="width: 0%">0%</div>
+                    </div>
+                </div>
+                
+                <button class="btn" onclick="openModal('goalModal')">➕ Add New Goal</button>
+                <button class="btn btn-secondary" style="margin-top: 10px;" onclick="openModal('journalModal')">📝 New Journal Entry</button>
+            </div>
+            
+            <!-- Goals Card -->
+            <div class="card">
+                <h2 class="card-title"><span>🎯</span> My Goals</h2>
+                
+                <div id="alertContainer"></div>
+                
+                <div class="tabs">
+                    <button class="tab active" onclick="switchTab('active')">Active</button>
+                    <button class="tab" onclick="switchTab('paused')">Paused</button>
+                    <button class="tab" onclick="switchTab('completed')">Completed</button>
+                </div>
+                
+                <div id="activeGoalsTab" class="tab-content active"></div>
+                <div id="pausedGoalsTab" class="tab-content"></div>
+                <div id="completedGoalsTab" class="tab-content"></div>
+            </div>
+            
+            <!-- Journal & Insights Card -->
+            <div class="card">
+                <h2 class="card-title"><span>📖</span> Journal & Insights</h2>
+                
+                <div class="form-group">
+                    <label class="form-label">Active Injuries</label>
+                    <div id="injuryList">
+                        <p style="color: rgba(255,255,255,0.6); font-size: 0.9rem;">No active injuries</p>
+                    </div>
+                </div>
+                
+                <button class="btn btn-danger" style="margin-bottom: 20px;" onclick="openModal('injuryModal')">🩹 Report Injury</button>
+                
+                <div class="form-group">
+                    <label class="form-label">Recent Adjustments</label>
+                    <div id="adjustmentLog"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Recent Journal Entries</label>
+                    <div id="journalEntries"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Add Goal Modal -->
+    <div id="goalModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Add New Goal</h3>
+                <button class="close-btn" onclick="closeModal('goalModal')">&times;</button>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Goal Name</label>
+                <input type="text" id="goalName" class="form-input" placeholder="e.g., Run 5km">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Goal Type</label>
+                <select id="goalType" class="form-select">
+                    <option value="weight_loss">Weight Loss</option>
+                    <option value="muscle_gain">Muscle Gain</option>
+                    <option value="endurance">Endurance</option>
+                    <option value="strength">Strength</option>
+                    <option value="flexibility">Flexibility</option>
+                    <option value="habit">Daily Habit</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Target Value</label>
+                <input type="number" id="goalTarget" class="form-input" placeholder="e.g., 75 kg or 30 minutes">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Current Value</label>
+                <input type="number" id="goalCurrent" class="form-input" placeholder="Starting point">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Deadline (Days)</label>
+                <input type="number" id="goalDeadline" class="form-input" placeholder="Number of days">
+            </div>
+            <button class="btn" onclick="addGoal()">Create Goal</button>
+        </div>
+    </div>
+    
+    <!-- Journal Modal -->
+    <div id="journalModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">New Journal Entry</h3>
+                <button class="close-btn" onclick="closeModal('journalModal')">&times;</button>
+            </div>
+            <div class="form-group">
+                <label class="form-label">How are you feeling today?</label>
+                <textarea id="journalText" class="form-textarea" placeholder="Share your thoughts, progress, challenges..."></textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Energy Level (1-10)</label>
+                <input type="range" id="energyLevel" min="1" max="10" value="5" class="form-input" style="padding: 0;">
+                <div style="text-align: center; color: #00ff96; font-weight: bold;" id="energyDisplay">5</div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Motivation Level (1-10)</label>
+                <input type="range" id="motivationLevel" min="1" max="10" value="5" class="form-input" style="padding: 0;">
+                <div style="text-align: center; color: #00ff96; font-weight: bold;" id="motivationDisplay">5</div>
+            </div>
+            <button class="btn" onclick="addJournalEntry()">Save Entry</button>
+        </div>
+    </div>
+    
+    <!-- Injury Modal -->
+    <div id="injuryModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Report Injury</h3>
+                <button class="close-btn" onclick="closeModal('injuryModal')">&times;</button>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Injury Type</label>
+                <input type="text" id="injuryType" class="form-input" placeholder="e.g., Knee strain">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Severity (1-10)</label>
+                <input type="range" id="injurySeverity" min="1" max="10" value="5" class="form-input" style="padding: 0;">
+                <div style="text-align: center; color: #ff4757; font-weight: bold;" id="severityDisplay">5</div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Expected Recovery (Days)</label>
+                <input type="number" id="recoveryDays" class="form-input" placeholder="Estimated days">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Affected Goals (comma-separated)</label>
+                <input type="text" id="affectedGoals" class="form-input" placeholder="Goal names">
+            </div>
+            <button class="btn btn-danger" onclick="reportInjury()">Report & Adjust Goals</button>
+        </div>
+    </div>
+    
+    <script>
+        let goals = [];
+        let journalEntries = [];
+        let injuries = [];
+        let adjustments = [];
+        
+        document.getElementById('energyLevel').addEventListener('input', (e) => {
+            document.getElementById('energyDisplay').textContent = e.target.value;
+        });
+        
+        document.getElementById('motivationLevel').addEventListener('input', (e) => {
+            document.getElementById('motivationDisplay').textContent = e.target.value;
+        });
+        
+        document.getElementById('injurySeverity').addEventListener('input', (e) => {
+            document.getElementById('severityDisplay').textContent = e.target.value;
+        });
+        
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+        }
+        
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+        
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(`${tab}GoalsTab`).classList.add('active');
+        }
+        
+        function addGoal() {
+            const goal = {
+                id: Date.now(),
+                name: document.getElementById('goalName').value,
+                type: document.getElementById('goalType').value,
+                target: parseFloat(document.getElementById('goalTarget').value),
+                current: parseFloat(document.getElementById('goalCurrent').value),
+                deadline: parseInt(document.getElementById('goalDeadline').value),
+                status: 'active',
+                createdAt: new Date(),
+                daysElapsed: 0,
+                skippedDays: 0,
+                adjustmentCount: 0
+            };
+            
+            goals.push(goal);
+            logAdjustment(`New goal created: ${goal.name}`);
+            closeModal('goalModal');
+            renderGoals();
+            updateDashboard();
+            
+            document.getElementById('goalName').value = '';
+            document.getElementById('goalTarget').value = '';
+            document.getElementById('goalCurrent').value = '';
+            document.getElementById('goalDeadline').value = '';
+        }
+        
+        function updateGoalProgress(goalId, newValue) {
+            const goal = goals.find(g => g.id === goalId);
+            if (goal) {
+                goal.current = parseFloat(newValue);
+                goal.daysElapsed++;
+                
+                const progress = calculateProgress(goal);
+                const expectedProgress = (goal.daysElapsed / goal.deadline) * 100;
+                
+                if (progress < expectedProgress - 10) {
+                    adjustGoal(goal, 'behind');
+                } else if (progress > expectedProgress + 10) {
+                    adjustGoal(goal, 'ahead');
+                }
+                
+                renderGoals();
+                updateDashboard();
+            }
+        }
+        
+        function adjustGoal(goal, reason) {
+            goal.adjustmentCount++;
+            
+            if (reason === 'behind') {
+                goal.deadline += 7;
+                logAdjustment(`Extended deadline for "${goal.name}" by 7 days due to slower progress`);
+            } else if (reason === 'ahead') {
+                goal.deadline = Math.max(goal.daysElapsed + 7, goal.deadline - 7);
+                logAdjustment(`Reduced deadline for "${goal.name}" by 7 days due to excellent progress`);
+            } else if (reason === 'injury') {
+                goal.status = 'paused';
+                logAdjustment(`Paused goal "${goal.name}" due to injury`);
+            } else if (reason === 'skipped') {
+                goal.skippedDays++;
+                if (goal.skippedDays > 3) {
+                    goal.deadline += 3;
+                    logAdjustment(`Extended deadline for "${goal.name}" by 3 days due to missed workouts`);
+                }
+            }
+            
+            renderGoals();
+            updateDashboard();
+        }
+        
+        function markSkipped(goalId) {
+            const goal = goals.find(g => g.id === goalId);
+            if (goal) {
+                adjustGoal(goal, 'skipped');
+            }
+        }
+        
+        function pauseGoal(goalId) {
+            const goal = goals.find(g => g.id === goalId);
+            if (goal) {
+                goal.status = 'paused';
+                logAdjustment(`Goal "${goal.name}" manually paused`);
+                renderGoals();
+                updateDashboard();
+            }
+        }
+        
+        function resumeGoal(goalId) {
+            const goal = goals.find(g => g.id === goalId);
+            if (goal) {
+                goal.status = 'active';
+                logAdjustment(`Goal "${goal.name}" resumed`);
+                renderGoals();
+                updateDashboard();
+            }
+        }
+        
+        function completeGoal(goalId) {
+            const goal = goals.find(g => g.id === goalId);
+            if (goal) {
+                goal.status = 'completed';
+                goal.completedAt = new Date();
+                logAdjustment(`🎉 Goal "${goal.name}" completed!`);
+                renderGoals();
+                updateDashboard();
+            }
+        }
+        
+        function deleteGoal(goalId) {
+            if (confirm('Are you sure you want to delete this goal?')) {
+                goals = goals.filter(g => g.id !== goalId);
+                renderGoals();
+                updateDashboard();
+            }
+        }
+        
+        function calculateProgress(goal) {
+            const total = Math.abs(goal.target - goal.current);
+            const achieved = Math.abs(goal.target - goal.current);
+            return ((achieved / total) * 100) || 0;
+        }
+        
+        function addJournalEntry() {
+            const entry = {
+                id: Date.now(),
+                text: document.getElementById('journalText').value,
+                energy: parseInt(document.getElementById('energyLevel').value),
+                motivation: parseInt(document.getElementById('motivationLevel').value),
+                date: new Date()
+            };
+            
+            journalEntries.unshift(entry);
+            if (journalEntries.length > 5) journalEntries.pop();
+            
+            closeModal('journalModal');
+            renderJournal();
+            
+            document.getElementById('journalText').value = '';
+            document.getElementById('energyLevel').value = 5;
+            document.getElementById('motivationLevel').value = 5;
+            document.getElementById('energyDisplay').textContent = 5;
+            document.getElementById('motivationDisplay').textContent = 5;
+        }
+           
+        function reportInjury() {
+            const injury = {
+                id: Date.now(),
+                type: document.getElementById('injuryType').value,
+                severity: parseInt(document.getElementById('injurySeverity').value),
+                recoveryDays: parseInt(document.getElementById('recoveryDays').value),
+                affectedGoals: document.getElementById('affectedGoals').value.split(',').map(g => g.trim()),
+                date: new Date()
+            };
+            
+            injuries.push(injury);
+            adjustGoalsForInjury(injury);
+            renderInjuries();
+            closeModal('injuryModal');
+            
+            document.getElementById('injuryType').value = '';
+            document.getElementById('injurySeverity').value = 5;
+            document.getElementById('recoveryDays').value = '';
+            document.getElementById('affectedGoals').value = '';
+            document.getElementById('severityDisplay').textContent = 5;
+        }
+                
+        function adjustGoalsForInjury(injury) {
+            injury.affectedGoals.forEach(goalName => {
+                const goal = goals.find(g => g.name.toLowerCase() === goalName.toLowerCase() && g.status === 'active');
+                if (goal) {
+                    adjustGoal(goal, 'injury');
+                }
+            });
+            logAdjustment(`Injury reported: ${injury.type}. Affected goals adjusted.`);
+        }
+        function logAdjustment(text) {
+            adjustments.unshift({
+                id: Date.now(),
+                text,
+                date: new Date()
+            });
+            if (adjustments.length > 5) adjustments.pop();
+            renderAdjustments();
+        }      
+        function renderGoals() {
+            const activeContainer = document.getElementById('activeGoalsTab');
+            const pausedContainer = document.getElementById('pausedGoalsTab');
+            const completedContainer = document.getElementById('completedGoalsTab');
+            
+            activeContainer.innerHTML = '';
+            pausedContainer.innerHTML = '';
+            completedContainer.innerHTML = '';
+            
+            goals.forEach(goal => {
+                const progress = calculateProgress(goal);
+                const goalItem = document.createElement('div');
+                goalItem.className = 'goal-item';
+                
+                const statusClass = goal.status === 'active' ? 'status-active' : goal.status === 'paused' ? 'status-paused' : 'status-completed';
+                const statusText = goal.status.charAt(0).toUpperCase() + goal.status.slice(1);
+                
+                goalItem.innerHTML = `
+                    <div class="goal-header">
+                        <span class="goal-name">${goal.name}</span>
+                        <span class="goal-status ${statusClass}">${statusText}</span>
+                    </div>
+                    <div class="goal-details">
+                        Type: ${goal.type.replace('_', ' ').toUpperCase()}<br>
+                        Progress: ${progress.toFixed(2)}%<br>
+                        Deadline: ${goal.deadline} days | Days Elapsed: ${goal.daysElapsed} | Skipped Days: ${goal.skippedDays}<br>
+                        Adjustments: ${goal.adjustmentCount}
+                    </div>
+                    <div class="goal-actions">
+                        ${goal.status === 'active' ? `<button class="btn btn-secondary btn-small" onclick="markSkipped(${goal.id})">Mark Skipped</button>
+                        <button class="btn btn-secondary btn-small" onclick="pauseGoal(${goal.id})">Pause</button>
+                        <button class="btn btn-secondary btn-small" onclick="completeGoal(${goal.id})">Complete</button>` : ''}
+                        ${goal.status === 'paused' ? `<button class="btn btn-secondary btn-small" onclick="resumeGoal(${goal.id})">Resume</button>` : ''}
+                        <button class="btn btn-danger btn-small" onclick="deleteGoal(${goal.id})">Delete</button>
+                    </div>
+                `;
+                
+                if (goal.status === 'active') {
+                    activeContainer.appendChild(goalItem);
+                } else if (goal.status === 'paused') {
+                    pausedContainer.appendChild(goalItem);
+                } else if (goal.status === 'completed') {
+                    completedContainer.appendChild(goalItem);
+                }        
+            });
+            if (activeContainer.innerHTML === '') {
+                activeContainer.innerHTML = '<p style="color: rgba(255,255,255,0.6); font-size: 0.9rem;">No active goals. Add a new goal to get started!</p>';
+            }
+            if (pausedContainer.innerHTML === '') {
+                pausedContainer.innerHTML = '<p style="color: rgba(255,255,255,0.6); font-size: 0.9rem;">No paused goals.</p>';
+            }
+            if (completedContainer.innerHTML === '') {
+                completedContainer.innerHTML = '<p style="color: rgba(255,255,255,0.6); font-size: 0.9rem;">No completed goals yet.</p>';
+            }
+        }
+        function renderJournal() {
+            const journalContainer = document.getElementById('journalEntries');
+            journalContainer.innerHTML = '';
+            
+            journalEntries.forEach(entry => {
+                const entryDiv = document.createElement('div');
+                entryDiv.className = 'journal-entry';
+                
+                entryDiv.innerHTML = `
+                    <div class="journal-date">${new Date(entry.date).toLocaleDateString()}</div>
+                    <div class="journal-text">${entry.text}</div>
+                    <div style="margin-top: 10px; font-size: 0.85rem; color: rgba(255,255,255,0.7);">
+                        Energy Level: ${entry.energy} | Motivation Level: ${entry.motivation}
+                    </div>
+                `;
+                
+                journalContainer.appendChild(entryDiv);
+            });
+            if (journalContainer.innerHTML === '') {
+                journalContainer.innerHTML = '<p style="color: rgba(255,255,255,0.6); font-size: 0.9rem;">No journal entries yet. Start journaling your journey!</p>';
+            }
+        }
+        function renderInjuries() {
+            const injuryContainer = document.getElementById('injuryList');
+            injuryContainer.innerHTML = '';
+            
+            if (injuries.length === 0) {
+                injuryContainer.innerHTML = '<p style="color: rgba(255,255,255,0.6); font-size: 0.9rem;">No active injuries</p>';
+                return;
+            }
+            
+            injuries.forEach(injury => {
+                const badge = document.createElement('span');
+                badge.className = 'injury-badge';
+                badge.textContent = `${injury.type} (Severity: ${injury.severity}, Recovery: ${injury.recoveryDays} days)`;
+                injuryContainer.appendChild(badge);
+            });
+        }
+
+        function renderAdjustments() {
+            const adjustmentContainer = document.getElementById('adjustmentLog');
+            adjustmentContainer.innerHTML = '';
+            
+            adjustments.forEach(adj => {
+                const adjDiv = document.createElement('div');
+                adjDiv.className = 'adjustment-log';
+                
+                adjDiv.innerHTML = `
+                    <div class="adjustment-date">${new Date(adj.date).toLocaleDateString()}</div>
+                    <div class="adjustment
+-text">${adj.text}</div>
+                `;
+                
+                adjustmentContainer.appendChild(adjDiv);
+            });
+            if (adjustmentContainer.innerHTML === '') {
+                adjustmentContainer.innerHTML = '<p style="color: rgba(255,255,255,0.6); font-size: 0.9rem;">No adjustments logged yet.</p>';
+            }
+        }
+        
+        function updateDashboard() {
+            const activeGoals = goals.filter(g => g.status === 'active').length;
+            const completedGoals = goals.filter(g => g.status === 'completed').length;
+            const totalAdjustments = adjustments.length;
+            
+            const currentStreak = journalEntries.length > 0 ? Math.floor((new Date() - new Date(journalEntries[0].date)) / (1000 * 60 * 60 * 24)) : 0;
+            
+            const overallProgress = goals.length > 0 ? (goals.reduce((acc, g) => acc + calculateProgress(g), 0) / goals.length) : 0;
+            
+            document.getElementById('activeGoals').textContent = activeGoals;
+            document.getElementById('completedGoals').textContent = completedGoals;
+            document.getElementById('totalAdjustments').textContent = totalAdjustments;
+            document.getElementById('currentStreak').textContent = currentStreak;
+            
+            const progressBar = document.getElementById('overallProgress');
+            progressBar.style.width = `${overallProgress.toFixed(2)}%`;
+            progressBar.textContent = `${overallProgress.toFixed(2)}%`;
+        }
+        
+        // Initial render
+        renderGoals();
+        renderJournal();
+        renderInjuries();
+        renderAdjustments();
+        updateDashboard();
+        
+        // Particle Background
+        particlesJS.load('particles', 'https://cdn.jsdelivr.net/gh/VincentGarreau/particles.js/particles.json', function() {
+          console.log('particles.js loaded - callback');
+        });
+    </script>
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+</body>
+</html>
